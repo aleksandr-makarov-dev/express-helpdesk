@@ -9,11 +9,12 @@ import compression from "compression";
 import { env } from "./utils/parse-env";
 import { ticketsRouter } from "./modules/tickets/tickets.router";
 import { errorHandler } from "./middleware/error-handler.middleware";
+import { usersRouter } from "./modules/users/users.router";
 
 dotenv.config();
 
 const app: Application = express();
-const port = process.env.PORT || env.PORT;
+const port = env.PORT || 5000;
 
 app.use(morgan("common"));
 app.use(cors());
@@ -28,6 +29,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/tickets", ticketsRouter);
+app.use("/api/users", usersRouter);
 
 app.use(errorHandler);
 
