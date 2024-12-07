@@ -5,4 +5,6 @@ export const API_ERROR_MESSAGES = {
   EMAIL_REGISTERED: "Email is already registered",
   USER_NOT_FOUND: "User does not exist",
   INVALID_CREDENTIALS: "Invalid email or password",
+  SESSION_NOT_FOUND: "Session does not exist",
+  SESSION_EXPIRED: "Session is expired",
 };

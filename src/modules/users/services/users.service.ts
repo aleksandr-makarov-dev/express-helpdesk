@@ -1,13 +1,16 @@
 import { PrismaClient, User } from "@prisma/client";
-import { RegisterRequest } from "./models/register.request";
-import { ApiError } from "../../utils/api-error";
+import { RegisterRequest } from "../models/register.request";
+import { ApiError } from "../../../utils/api-error";
 import { StatusCodes } from "http-status-codes";
-import { API_ERROR_MESSAGES } from "../../constants/errors";
+import { API_ERROR_MESSAGES } from "../../../constants/errors";
 import { passwordService } from "./password.service";
-import { UserResponse } from "./models/user.response";
-import { usersMapper } from "./users.mapper";
-import { LoginRequest } from "./models/login.request";
+import { usersMapper } from "../users.mapper";
+import { LoginRequest } from "../models/login.request";
 import { tokensService } from "./tokens.service";
+import { sessionsService } from "./sessions.service";
+import { LoginResponse } from "../models/login.response";
+import { UserResponse } from "../models/user.response";
+import { SessionResponse } from "../models/session.response";
 
 const prisma = new PrismaClient();
 
@@ -35,7 +38,7 @@ async function registerUser(request: RegisterRequest): Promise<UserResponse> {
   return usersMapper.toUserResponse(createdUser);
 }
 
-async function loginUser(request: LoginRequest) {
+async function loginUser(request: LoginRequest): Promise<SessionResponse> {
   const foundUser = await findByEmail(request.email);
 
   if (!foundUser) {
@@ -45,10 +48,25 @@ async function loginUser(request: LoginRequest) {
     );
   }
 
-  const refreshToken = tokensService.generateRefreshToken();
+  const valid = passwordService.verifyPassword(
+    request.password,
+    foundUser.passwordHash
+  );
+
+  if (!valid) {
+    throw new ApiError(
+      StatusCodes.UNAUTHORIZED,
+      API_ERROR_MESSAGES.INVALID_CREDENTIALS
+    );
+  }
+
+  const session = await sessionsService.createSession(foundUser);
+
   const accessToken = tokensService.generateAccessToken(
     usersMapper.ToPayload(foundUser)
   );
+
+  return usersMapper.ToSessionResponse(foundUser, session, accessToken);
 }
 
 // private
@@ -67,4 +85,5 @@ async function isEmailConfirmed(user: User) {
 
 export const usersService = {
   registerUser,
+  loginUser,
 };

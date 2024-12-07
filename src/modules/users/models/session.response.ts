@@ -1,6 +1,8 @@
 import { UserResponse } from "./user.response";
 
-export interface LoginResponse {
+export interface SessionResponse {
+  refreshToken: string;
+  refreshTokenExpiresAt: Date;
   accessToken: string;
   accessTokenExpiresAt: Date;
   user: UserResponse;

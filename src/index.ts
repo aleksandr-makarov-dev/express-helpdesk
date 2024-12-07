@@ -10,6 +10,7 @@ import { env } from "./utils/parse-env";
 import { ticketsRouter } from "./modules/tickets/tickets.router";
 import { errorHandler } from "./middleware/error-handler.middleware";
 import { usersRouter } from "./modules/users/users.router";
+import { sessionHandler } from "./modules/users/middlewares/session-handler.middleware";
 
 dotenv.config();
 
@@ -28,7 +29,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to Express & TypeScript Server");
 });
 
-app.use("/api/tickets", ticketsRouter);
+app.use("/api/tickets", [sessionHandler], ticketsRouter);
 app.use("/api/users", usersRouter);
 
 app.use(errorHandler);
